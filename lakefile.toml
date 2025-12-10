@@ -1,0 +1,10 @@
+name = "lean-rning"
+version = "0.1.0"
+defaultTargets = ["lean-rning"]
+
+[[lean_lib]]
+name = "LeanRning"
+
+[[lean_exe]]
+name = "lean-rning"
+root = "Main"
