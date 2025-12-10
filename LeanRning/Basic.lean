@@ -16,8 +16,8 @@ inductive NumberGreaterThan (num : Int) : Type
 | nothing : NumberGreaterThan num
 
 def greaterThan (num : Int) (val : Int) : NumberGreaterThan num :=
-  if   h : val > num
-  then NumberGreaterThan.just val h
+  if   holds: val > num
+  then NumberGreaterThan.just val holds
   else NumberGreaterThan.nothing
 
 def greaterThanTen := greaterThan 10
