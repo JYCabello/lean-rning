@@ -65,7 +65,7 @@ def process (exitCode : UInt32) (args : List String) : IO UInt32 := do
   match args with
   | [] => pure exitCode
   | "--help" :: args =>
-    dump (← stringStream "no help is coming")
+    dump (← stringStream "Expect no help")
     process exitCode args
   | "-" :: args =>
     dump (← IO.getStdin)
