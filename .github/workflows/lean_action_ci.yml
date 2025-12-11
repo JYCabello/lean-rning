@@ -8,10 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./playground
 
     steps:
       - uses: actions/checkout@v5
       - name: Lean Action
         uses: leanprover/lean-action@v1
-        with:
-          working-directory: playground
