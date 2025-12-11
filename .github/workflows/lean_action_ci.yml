@@ -11,6 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Move to Subfolder
+        run: cd playground
       - uses: leanprover/lean-action@v1
-        with:
-          working-directory: playground
