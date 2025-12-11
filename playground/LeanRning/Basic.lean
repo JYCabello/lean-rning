@@ -12,12 +12,12 @@ def positive (num: Int) : Maybe Nat :=
 #eval positive (5)
 
 inductive NumberGreaterThan (num : Int) : Type
-| just (val : Int) (h : val > num) : NumberGreaterThan num
+| just (h : val > num) (val : Int)  : NumberGreaterThan num
 | nothing : NumberGreaterThan num
 
 def greaterThan (num : Int) (val : Int) : NumberGreaterThan num :=
-  if   holds: val > num
-  then NumberGreaterThan.just val holds
+  if   h: val > num
+  then NumberGreaterThan.just h val
   else NumberGreaterThan.nothing
 
 def greaterThanTen := greaterThan 10
