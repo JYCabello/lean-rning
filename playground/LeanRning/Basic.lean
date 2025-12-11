@@ -20,6 +20,11 @@ def greaterThan (num : Int) (val : Int) : NumberGreaterThan num :=
   then NumberGreaterThan.just h val
   else NumberGreaterThan.nothing
 
+def greaterThanPatterned (num : Int) (val : Int) : NumberGreaterThan num :=
+  match h : decide (val > num) with
+  | true  => NumberGreaterThan.just (of_decide_eq_true h) val
+  | false => NumberGreaterThan.nothing
+
 def greaterThanTen := greaterThan 10
 
 #eval greaterThanTen 15
