@@ -1,7 +1,7 @@
 
 def bufsize : USize := 20 * 1024
 
-partial def dump (stream: IO.FS.Stream) : IO Unit := do
+partial def dump (stream : IO.FS.Stream) : IO Unit := do
   let buf ← stream.read bufsize
   if buf.isEmpty then
     pure ()
@@ -10,7 +10,7 @@ partial def dump (stream: IO.FS.Stream) : IO Unit := do
     stdout.write buf
     dump stream
 
-def fileStream (filename: System.FilePath) : IO (Option IO.FS.Stream) := do
+def fileStream (filename : System.FilePath) : IO (Option IO.FS.Stream) := do
   if (not (← filename.pathExists)) then
     let stderr ← IO.getStderr
     stderr.putStrLn s!"File not found: {filename}"
