@@ -14,4 +14,4 @@ jobs:
       - name: Lean Action
         uses: leanprover/lean-action@v1
         with:
-          working-directory: ./playground
+          working-directory: playground
