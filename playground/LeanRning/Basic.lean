@@ -12,17 +12,17 @@ def positive (num: Int) : Maybe Nat :=
 #eval positive (5)
 
 inductive NumberGreaterThan (num : Int) : Type
-| just (h : val > num) (val : Int)  : NumberGreaterThan num
+| just (val : Int) (h : val > num)   : NumberGreaterThan num
 | nothing : NumberGreaterThan num
 
 def greaterThan (num : Int) (val : Int) : NumberGreaterThan num :=
   if   h: val > num
-  then NumberGreaterThan.just h val
+  then NumberGreaterThan.just val h
   else NumberGreaterThan.nothing
 
 def greaterThanPatterned (num : Int) (val : Int) : NumberGreaterThan num :=
   match h : decide (val > num) with
-  | true  => NumberGreaterThan.just (of_decide_eq_true h) val
+  | true  => NumberGreaterThan.just val (of_decide_eq_true h)
   | false => NumberGreaterThan.nothing
 
 def greaterThanTen := greaterThan 10
