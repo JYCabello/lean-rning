@@ -20,7 +20,7 @@ inductive NumberGreaterThan (num : Int) : Type
 
 instance : Repr (NumberGreaterThan num) where
   reprPrec x _ := match x with
-    | NumberGreaterThan.just val _ => s!"NumberGreaterThan {num} < {val}"
+    | NumberGreaterThan.just val _ => s!"Number {val} is greater than {num}"
 
 def greaterThan (num : Int) (val : Int) : Option (NumberGreaterThan num) :=
   if   h: IsGreaterThan num val
