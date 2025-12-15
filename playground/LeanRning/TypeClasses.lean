@@ -29,6 +29,22 @@ instance : OfNat Positive (n + 1) where
       | k + 1 => Positive.succ (getNat k)
     getNat n
 
+    instance : Add Positive where
+      add a b :=
+        let rec add' : Positive → Positive → Positive
+          | a, Positive.one => Positive.succ a
+          | a, Positive.succ b => Positive.succ (add' a b)
+        add' a b
+
+        instance : ToString Positive where
+          toString
+            | Positive.one => "1"
+            | Positive.succ p =>
+              let rec toNat : Positive → Nat
+                | Positive.one => 1
+                | Positive.succ p => (toNat p) + 1
+              toString (toNat (Positive.succ p))
+
 def positives : List Positive := [1, 2, 3]
 
 #eval [1, 2, 3].trySumOfContents
