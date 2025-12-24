@@ -28,7 +28,7 @@ def greaterThan (num : Int) (val : Int) : Option (NumberGreaterThan num) :=
   else none
 
 def greaterThanPatterned (num : Int) (val : Int) : Option (NumberGreaterThan num) :=
-  match h : decide (num < val) with
+  match h : num < val |> decide with
   | true  => some <| NumberGreaterThan.just val (of_decide_eq_true h)
   | false => none
 
