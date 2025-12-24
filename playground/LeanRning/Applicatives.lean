@@ -4,15 +4,13 @@ structure CheckedInput (thisYear : Nat) : Type where
 
 def validPerson : CheckedInput 2025 :=
   { name := ⟨"Alice", by decide⟩
-    birthYear := ⟨1990, by decide⟩
-  }
+    birthYear := ⟨1990, by decide⟩ }
 
 def tryValidPerson (name : String) (year : Nat) : Option (CheckedInput 2025) :=
-  if hName : name ≠ "" then
-  if hYear : year > 1900 ∧ year ≤ 2025 then
-      some { name := ⟨name, hName⟩, birthYear := ⟨year, hYear⟩ }
-  else none
-  else none
+  if h : name ≠ "" ∧ year > 1900 ∧ year ≤ 2025 then
+    some { name := ⟨name, by simp [h]⟩, birthYear := ⟨year, by simp [h]⟩ }
+  else
+    none
 
 structure NonEmptyList (α : Type) : Type where
   head : α
@@ -51,3 +49,26 @@ instance : Applicative (Validate ε) where
 def Field := String
 def reportError (f : Field) (msg : String) : Validate (Field × String) α :=
   .errors { head := (f, msg), tail := [] }
+
+def checkName (name : String) : Validate (Field × String) {n : String // n ≠ ""} :=
+  if h : name = "" then
+    reportError "name" "Required"
+  else pure ⟨name, h⟩
+
+def Validate.andThen (val : Validate ε α) (next : α → Validate ε β) : Validate ε β :=
+  match val with
+  | .errors errs => .errors errs
+  | .ok x => next x
+
+def checkYearIsNat (year : String) : Validate (Field × String) Nat :=
+  match year.trim.toNat? with
+  | none => reportError "birth year" "Must be digits"
+  | some n => pure n
+
+def checkBirthYear (thisYear year : Nat) :
+    Validate (Field × String) {y : Nat // y > 1900 ∧ y ≤ thisYear} :=
+  if h : year > 1900 then
+    if h' : year ≤ thisYear then
+      pure ⟨year, by simp [h, h']⟩
+    else reportError "birth year" s!"Must be no later than {thisYear}"
+  else reportError "birth year" "Must be after 1900"
