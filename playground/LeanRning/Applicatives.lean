@@ -80,12 +80,15 @@ def checkBirthYear (thisYear year : Nat) :
     else reportError "birth year" s!"Must be no later than {thisYear}"
   else reportError "birth year" "Must be after 1900"
 
+def checkYear (yearInput : String) (thisYear : Nat):
+    Validate (Field × String) {y : Nat // y > 1900 ∧ y ≤ thisYear} :=
+  (checkYearIsNat yearInput).andThen <| checkBirthYear thisYear
+
 def checkInput (year : Nat) (input : RawInput) : Validate (Field × String) (CheckedInput year) :=
   pure CheckedInput.mk <*>
-    checkName input.name <*>
-    (checkYearIsNat input.birthYear).andThen fun birthYearAsNat =>
-      checkBirthYear year birthYearAsNat
-
+  checkName input.name <*>
+  checkYear input.birthYear year
 
 
 #eval checkInput 2023 {name := "David", birthYear := "1984"}
+#eval checkInput 2023 {name := "", birthYear := "2045"}
