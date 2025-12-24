@@ -6,7 +6,7 @@ def List.sumOfContents [Add α] [Zero α] : List α -> α :=
       | x :: xs => sum xs (x + acc)
     sum lst Zero.zero
 
-def List.trySumOfContents [Add α] : List α -> Option α :=
+def List.trySumOfContents {α} [Add α] : List α -> Option α :=
   λ lst =>
     let rec sum l (acc : Option α) :=
       match l with
