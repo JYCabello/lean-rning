@@ -1,6 +1,11 @@
+structure RawInput where
+  name : String
+  birthYear : String
+
 structure CheckedInput (thisYear : Nat) : Type where
   name : {n : String // n ≠ ""}
   birthYear : {y : Nat // y > 1900 ∧ y ≤ thisYear}
+  deriving Repr
 
 def validPerson : CheckedInput 2025 :=
   { name := ⟨"Alice", by decide⟩
@@ -15,6 +20,7 @@ def tryValidPerson (name : String) (year : Nat) : Option (CheckedInput 2025) :=
 structure NonEmptyList (α : Type) : Type where
   head : α
   tail : List α
+  deriving Repr
 
 def NonEmptyList.append (xs ys : NonEmptyList α) : NonEmptyList α :=
   ⟨xs.head, xs.tail ++ [ys.head] ++ ys.tail⟩
@@ -30,6 +36,7 @@ instance : HAppend (NonEmptyList α) (List α) (NonEmptyList α) where
 inductive Validate (ε α : Type) : Type where
   | ok : α → Validate ε α
   | errors : NonEmptyList ε → Validate ε α
+  deriving Repr
 
 instance : Functor (Validate ε) where
   map f
@@ -46,7 +53,7 @@ instance : Applicative (Validate ε) where
       | .ok _ => .errors errs
       | .errors errs' => .errors (errs ++ errs')
 
-def Field := String
+def Field := String deriving Repr
 def reportError (f : Field) (msg : String) : Validate (Field × String) α :=
   .errors { head := (f, msg), tail := [] }
 
@@ -69,6 +76,16 @@ def checkBirthYear (thisYear year : Nat) :
     Validate (Field × String) {y : Nat // y > 1900 ∧ y ≤ thisYear} :=
   if h : year > 1900 then
     if h' : year ≤ thisYear then
-      pure ⟨year, by simp [h, h']⟩
+      pure ⟨year, by simp [*]⟩
     else reportError "birth year" s!"Must be no later than {thisYear}"
   else reportError "birth year" "Must be after 1900"
+
+def checkInput (year : Nat) (input : RawInput) : Validate (Field × String) (CheckedInput year) :=
+  pure CheckedInput.mk <*>
+    checkName input.name <*>
+    (checkYearIsNat input.birthYear).andThen fun birthYearAsNat =>
+      checkBirthYear year birthYearAsNat
+
+
+
+#eval checkInput 2023 {name := "David", birthYear := "1984"}
