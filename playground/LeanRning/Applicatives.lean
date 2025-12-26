@@ -89,6 +89,11 @@ def checkInput (year : Nat) (input : RawInput) : Validate (Field × String) (Che
   checkName input.name <*>
   checkYear input.birthYear year
 
+def doubleId (a : α) (b : β) : (α × β) := (a, b)
+
+def tripleId (a : α) (b : β) (c : γ) : (α × β × γ) := (a, b, c)
+
+#eval pure tripleId <*> checkName "potato" <*> checkYear "1999" 2020 <*> checkName "banana"
 
 #eval checkInput 2023 {name := "David", birthYear := "1984"}
 #eval checkInput 2023 {name := "", birthYear := "2045"}
