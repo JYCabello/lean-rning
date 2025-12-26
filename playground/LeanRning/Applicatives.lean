@@ -2,9 +2,12 @@ structure RawInput where
   name : String
   birthYear : String
 
+def NonEmptyString := {n : String // n ≠ ""} deriving Repr
+def ValidBirthDate thisYear := {y : Nat // y > 1900 ∧ y ≤ thisYear} deriving Repr
+
 structure CheckedInput (thisYear : Nat) : Type where
-  name : {n : String // n ≠ ""}
-  birthYear : {y : Nat // y > 1900 ∧ y ≤ thisYear}
+  name : NonEmptyString
+  birthYear : ValidBirthDate thisYear
   deriving Repr
 
 def validPerson : CheckedInput 2025 :=
@@ -57,7 +60,7 @@ def Field := String deriving Repr
 def reportError (f : Field) (msg : String) : Validate (Field × String) α :=
   .errors { head := (f, msg), tail := [] }
 
-def checkName (name : String) : Validate (Field × String) {n : String // n ≠ ""} :=
+def checkName (name : String) : Validate (Field × String) NonEmptyString :=
   if h : name = "" then
     reportError "name" "Required"
   else pure ⟨name, h⟩
@@ -72,22 +75,20 @@ def checkYearIsNat (year : String) : Validate (Field × String) Nat :=
   | none => reportError "birth year" "Must be digits"
   | some n => pure n
 
-def checkBirthYear (thisYear year : Nat) :
-    Validate (Field × String) {y : Nat // y > 1900 ∧ y ≤ thisYear} :=
+def checkBirthYear (thisYear year : Nat) : Validate (Field × String) (ValidBirthDate thisYear) :=
   if h : year > 1900 then
     if h' : year ≤ thisYear then
       pure ⟨year, by simp [*]⟩
     else reportError "birth year" s!"Must be no later than {thisYear}"
   else reportError "birth year" "Must be after 1900"
 
-def checkYear (yearInput : String) (thisYear : Nat):
-    Validate (Field × String) {y : Nat // y > 1900 ∧ y ≤ thisYear} :=
+def checkYear (yearInput : String) (thisYear : Nat): Validate (Field × String) (ValidBirthDate thisYear) :=
   (checkYearIsNat yearInput).andThen <| checkBirthYear thisYear
 
-def checkInput (year : Nat) (input : RawInput) : Validate (Field × String) (CheckedInput year) :=
+def checkInput (thisYear : Nat) (input : RawInput) : Validate (Field × String) (CheckedInput thisYear) :=
   pure CheckedInput.mk <*>
   checkName input.name <*>
-  checkYear input.birthYear year
+  checkYear input.birthYear thisYear
 
 def doubleId (a : α) (b : β) : (α × β) := (a, b)
 
