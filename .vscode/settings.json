@@ -3,5 +3,10 @@
     "Rning",
     "succ"
   ],
-  "cSpell.enabled": false
+  "cSpell.enabled": false,
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": "commit-message.md"
+    }
+  ]
 }
