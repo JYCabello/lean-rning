@@ -23,7 +23,18 @@ def tryValidPerson (name : String) (year : Nat) : Option (CheckedInput 2025) :=
 structure NonEmptyList (α : Type) : Type where
   head : α
   tail : List α
-  deriving Repr
+
+instance : Coe (α) (NonEmptyList α) where
+  coe a := { head := a, tail := [] }
+
+def NonEmptyList.asList (as : NonEmptyList α) :=
+  [as.head] ++ as.tail
+
+instance {α} [Repr α] : Repr (NonEmptyList α) where
+ reprPrec as _ :=
+  as.asList.foldl
+    (λ acc a => s!"{acc}{Repr.reprPrec a 0}")
+    ""
 
 def NonEmptyList.append (xs ys : NonEmptyList α) : NonEmptyList α :=
   ⟨xs.head, xs.tail ++ [ys.head] ++ ys.tail⟩
@@ -62,7 +73,7 @@ def sampleError : TreeError :=
 
 #eval sampleError
 
-def toTree (path: String) (errs: NonEmptyList (Field × String)) : TreeError :=
+def toTree (path: String) (errs: NonEmptyList (Field × String)) : NonEmptyList TreeError :=
   errs.tail.foldl
       (λ acc err => acc ++ TreeError.field err.fst err.snd)
       (TreeError.path path (TreeError.field errs.head.fst errs.head.snd))
@@ -204,3 +215,15 @@ def checkHumanAfter1970
     .humanAfter1970
     <$> checkSubtype y (· > 1970) ("birth year", "greater than 1970")
     <*> checkName input.name
+
+def checkLegacyInput
+    (input : RawInput)
+    : Validate TreeValidationErrors LegacyCheckedInput :=
+  (checkCompany input).mapErrors (λ e => toTree "Company" e)
+  <|> (checkHumanBefore1970 input).mapErrors (λ e => toTree "Human born before 1970" e)
+  <|> (checkHumanAfter1970 input).mapErrors (λ e => toTree "Human born after 1970" e)
+
+#eval checkLegacyInput ⟨"Johnny's Troll Groomers", "FIRM"⟩
+#eval checkLegacyInput ⟨"Johnny", "1963"⟩
+#eval checkLegacyInput ⟨"", "1963"⟩
+#eval checkLegacyInput ⟨"", "1970"⟩
