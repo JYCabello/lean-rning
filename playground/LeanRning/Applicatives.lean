@@ -87,6 +87,9 @@ instance [Append ε] : Applicative (Validate ε) where
       | .ok _ => .errors errs
       | .errors errs' => .errors (errs ++ errs')
 
+def Validate.mapErrors : Validate ε α → (ε → ε') → Validate ε' α
+  | .ok a, _ => .ok a
+  | .errors err, f => .errors (f err)
 
 abbrev ValidationErrors := (NonEmptyList (Field × String))
 
