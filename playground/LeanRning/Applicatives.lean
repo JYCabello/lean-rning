@@ -36,6 +36,8 @@ instance : HAppend (NonEmptyList α) (List α) (NonEmptyList α) where
   hAppend xs ys :=
     { head := xs.head, tail := xs.tail ++ ys }
 
+abbrev Field := String
+
 inductive TreeError where
   | field : Field → String → TreeError
   | path : String → TreeError → TreeError
@@ -43,6 +45,22 @@ inductive TreeError where
 
 instance : Append TreeError where
   append := .both
+
+instance : Repr TreeError where
+  reprPrec e _ :=
+    let rec render err :=
+      match err with
+      | .field f msg => s!"  -{f}: {msg}\n"
+      | .path p e => s!"{p}:\n{render e}"
+      | .both e1 e2 => s!"{render e1}{render e2}"
+    render e
+
+def sampleError : TreeError :=
+  (TreeError.path "Person" (TreeError.field "name" "Must not be empty"))
+   ++ TreeError.field "name" "Cannot include hieroglyphs"
+   ++ TreeError.field "name" "Should have some coolness to it"
+
+#eval sampleError
 
 inductive Validate (ε α : Type) : Type where
   | ok : α → Validate ε α
@@ -64,7 +82,6 @@ instance [Append ε] : Applicative (Validate ε) where
       | .ok _ => .errors errs
       | .errors errs' => .errors (errs ++ errs')
 
-def Field := String deriving Repr
 
 abbrev ValidationErrors := (NonEmptyList (Field × String))
 
