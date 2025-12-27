@@ -11,7 +11,7 @@ def positive (num: Int) : Maybe Nat :=
   | Int.ofNat (Nat.succ n) => Maybe.just (n + 1)
   | _                      => Maybe.nothing
 
-#eval positive (5)
+#eval positive 5
 
 abbrev IsGreaterThan (num : Int) (val: Int) : Prop := val > num
 
@@ -37,10 +37,10 @@ def matchesProp
     (comparand : α)
     (value : β)
     (prop : α → β → Prop)
-    (ctor : {x : β // prop comparand x} → γ)
+    (ctor : {val' : β // prop comparand val'} → γ)
     [Decidable (prop comparand value)]
     : (Option γ) :=
-   if h : prop comparand value then some (ctor ⟨value, h⟩) else none
+   if holds : prop comparand value then some (ctor ⟨value, holds⟩) else none
 
 def greaterThanPassingProp (gt : Int) (val : Int) : Option (NumberGreaterThan gt) :=
   matchesProp gt val (· < ·) NumberGreaterThan.just
