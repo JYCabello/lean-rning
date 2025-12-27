@@ -20,19 +20,19 @@ def tryValidPerson (name : String) (year : Nat) : Option (CheckedInput 2025) :=
   else
     none
 
-structure NonEmptyList (α : Type) : Type where
+structure NonEmptyList (α) : Type u where
   head : α
   tail : List α
 
 instance : Coe (α) (NonEmptyList α) where
   coe a := { head := a, tail := [] }
 
-def NonEmptyList.asList (as : NonEmptyList α) :=
-  [as.head] ++ as.tail
+instance : Coe (NonEmptyList α) (List α) where
+  coe nel := [nel.head] ++ nel.tail
 
-instance {α} [Repr α] : Repr (NonEmptyList α) where
+instance [Repr α] : Repr (NonEmptyList α) where
  reprPrec as _ :=
-  as.asList.foldl
+  (as : List α).foldl
     (λ acc a => s!"{acc}{Repr.reprPrec a 0}")
     ""
 
@@ -107,7 +107,7 @@ abbrev ValidationErrors := (NonEmptyList (Field × String))
 abbrev TreeValidationErrors := (NonEmptyList TreeError)
 
 def reportError (f : Field) (msg : String) : Validate ValidationErrors α :=
-  .errors { head := (f, msg), tail := [] }
+  .errors (f, msg)
 
 def checkName (name : String) : Validate ValidationErrors NonEmptyString :=
   if h : name = "" then
@@ -198,7 +198,7 @@ def checkSubtype
   if h : p v then
     pure ⟨v, h⟩
   else
-    .errors { head := err, tail := [] }
+    .errors err
 
 def checkHumanBefore1970
     (input : RawInput)
@@ -219,9 +219,9 @@ def checkHumanAfter1970
 def checkLegacyInput
     (input : RawInput)
     : Validate TreeValidationErrors LegacyCheckedInput :=
-  (checkCompany input).mapErrors (λ e => toTree "Company" e)
-  <|> (checkHumanBefore1970 input).mapErrors (λ e => toTree "Human born before 1970" e)
-  <|> (checkHumanAfter1970 input).mapErrors (λ e => toTree "Human born after 1970" e)
+  (checkCompany input).mapErrors (toTree "Company")
+  <|> (checkHumanBefore1970 input).mapErrors (toTree "Human born before 1970")
+  <|> (checkHumanAfter1970 input).mapErrors (toTree "Human born after 1970")
 
 #eval checkLegacyInput ⟨"Johnny's Troll Groomers", "FIRM"⟩
 #eval checkLegacyInput ⟨"Johnny", "1963"⟩
