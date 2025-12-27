@@ -94,6 +94,14 @@ def doubleId (a : α) (b : β) : (α × β) := (a, b)
 
 def tripleId (a : α) (b : β) (c : γ) : (α × β × γ) := (a, b, c)
 
+inductive TreeError where
+  | field : Field → String → TreeError
+  | path : String → TreeError → TreeError
+  | both : TreeError → TreeError → TreeError
+
+instance : Append TreeError where
+  append := .both
+
 #eval pure tripleId <*> checkName "potato" <*> checkYear "1999" 2020 <*> checkName "banana"
 
 #eval checkInput 2023 {name := "David", birthYear := "1984"}
