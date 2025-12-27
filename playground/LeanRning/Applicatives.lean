@@ -93,6 +93,8 @@ def Validate.mapErrors : Validate ε α → (ε → ε') → Validate ε' α
 
 abbrev ValidationErrors := (NonEmptyList (Field × String))
 
+abbrev TreeValidationErrors := (NonEmptyList TreeError)
+
 def reportError (f : Field) (msg : String) : Validate ValidationErrors α :=
   .errors { head := (f, msg), tail := [] }
 
