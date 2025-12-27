@@ -36,7 +36,6 @@ instance : HAppend (NonEmptyList α) (List α) (NonEmptyList α) where
   hAppend xs ys :=
     { head := xs.head, tail := xs.tail ++ ys }
 
-
 inductive TreeError where
   | field : Field → String → TreeError
   | path : String → TreeError → TreeError
