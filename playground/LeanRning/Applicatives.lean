@@ -62,6 +62,12 @@ def sampleError : TreeError :=
 
 #eval sampleError
 
+def toTree (path: String) (errs: NonEmptyList (Field × String)) : TreeError :=
+  errs.tail
+  |> List.foldl
+      (λ acc err => acc ++ TreeError.field err.fst err.snd)
+      (TreeError.path path (TreeError.field errs.head.fst errs.head.snd))
+
 inductive Validate (ε α : Type) : Type where
   | ok : α → Validate ε α
   | errors : ε → Validate ε α
