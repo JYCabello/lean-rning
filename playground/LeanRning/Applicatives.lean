@@ -174,5 +174,5 @@ def checkThat
 
 def checkCompany (input : RawInput) :  Validate ValidationErrors LegacyCheckedInput :=
   checkThat (input.birthYear == "FIRM") "birth year" "FIRM if a company"
-  *> pure .company
-  <*> checkName input.name
+  *> .company
+  <$> checkName input.name
