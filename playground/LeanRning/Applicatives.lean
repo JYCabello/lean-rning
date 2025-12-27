@@ -135,3 +135,44 @@ def tripleId (a : α) (b : β) (c : γ) : (α × β × γ) := (a, b, c)
 
 #eval checkInput 2023 {name := "David", birthYear := "1984"}
 #eval checkInput 2023 {name := "", birthYear := "2045"}
+
+inductive LegacyCheckedInput where
+  | humanBefore1970 :
+    (birthYear : {y : Nat // y > 999 ∧ y < 1970}) →
+    String →
+    LegacyCheckedInput
+  | humanAfter1970 :
+    (birthYear : {y : Nat // y > 1970}) →
+    NonEmptyString →
+    LegacyCheckedInput
+  | company :
+    NonEmptyString →
+    LegacyCheckedInput
+deriving Repr
+
+def Validate.orElse
+    [Append ε]
+    (a : Validate ε α)
+    (b : Unit → Validate ε α):
+    Validate ε α :=
+  match a with
+  | .ok x => .ok x
+  | .errors errs1 =>
+    match b () with
+    | .ok x => .ok x
+    | .errors errs2 => .errors (errs1 ++ errs2)
+
+instance [Append ε] : OrElse (Validate ε α) where
+  orElse := Validate.orElse
+
+def checkThat
+    (condition : Bool)
+    (field : Field)
+    (msg : String)
+    : Validate ValidationErrors Unit :=
+  if condition then pure () else reportError field msg
+
+def checkCompany (input : RawInput) :  Validate ValidationErrors LegacyCheckedInput :=
+  pure (fun () name => .company name) <*>
+  checkThat (input.birthYear == "FIRM") "birth year" "FIRM if a company" <*>
+  checkName input.name
