@@ -38,7 +38,7 @@ instance : HAppend (NonEmptyList α) (List α) (NonEmptyList α) where
 
 inductive Validate (ε α : Type) : Type where
   | ok : α → Validate ε α
-  | errors : NonEmptyList ε → Validate ε α
+  | errors : ε → Validate ε α
   deriving Repr
 
 instance : Functor (Validate ε) where
@@ -46,7 +46,7 @@ instance : Functor (Validate ε) where
    | .ok x => .ok (f x)
    | .errors errs => .errors errs
 
-instance : Applicative (Validate ε) where
+instance [Append ε] : Applicative (Validate ε) where
   pure := .ok
   seq f x :=
     match f with
@@ -57,10 +57,13 @@ instance : Applicative (Validate ε) where
       | .errors errs' => .errors (errs ++ errs')
 
 def Field := String deriving Repr
-def reportError (f : Field) (msg : String) : Validate (Field × String) α :=
+
+abbrev ValidationErrors := (NonEmptyList (Field × String))
+
+def reportError (f : Field) (msg : String) : Validate ValidationErrors α :=
   .errors { head := (f, msg), tail := [] }
 
-def checkName (name : String) : Validate (Field × String) NonEmptyString :=
+def checkName (name : String) : Validate ValidationErrors NonEmptyString :=
   if h : name = "" then
     reportError "name" "Required"
   else pure ⟨name, h⟩
@@ -70,22 +73,22 @@ def Validate.andThen (val : Validate ε α) (next : α → Validate ε β) : Val
   | .errors errs => .errors errs
   | .ok x => next x
 
-def checkYearIsNat (year : String) : Validate (Field × String) Nat :=
+def checkYearIsNat (year : String) : Validate ValidationErrors Nat :=
   match year.trim.toNat? with
   | none => reportError "birth year" "Must be digits"
   | some n => pure n
 
-def checkBirthYear (thisYear year : Nat) : Validate (Field × String) (ValidBirthDate thisYear) :=
+def checkBirthYear (thisYear year : Nat) : Validate ValidationErrors (ValidBirthDate thisYear) :=
   if h : year > 1900 then
     if h' : year ≤ thisYear then
       pure ⟨year, by simp [*]⟩
     else reportError "birth year" s!"Must be no later than {thisYear}"
   else reportError "birth year" "Must be after 1900"
 
-def checkYear (yearInput : String) (thisYear : Nat): Validate (Field × String) (ValidBirthDate thisYear) :=
+def checkYear (yearInput : String) (thisYear : Nat): Validate ValidationErrors (ValidBirthDate thisYear) :=
   (checkYearIsNat yearInput).andThen <| checkBirthYear thisYear
 
-def checkInput (thisYear : Nat) (input : RawInput) : Validate (Field × String) (CheckedInput thisYear) :=
+def checkInput (thisYear : Nat) (input : RawInput) : Validate ValidationErrors (CheckedInput thisYear) :=
   pure CheckedInput.mk <*>
   checkName input.name <*>
   checkYear input.birthYear thisYear
