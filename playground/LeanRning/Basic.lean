@@ -24,12 +24,12 @@ instance : Repr (NumberGreaterThan num) where
 
 def greaterThan (num : Int) (val : Int) : Option (NumberGreaterThan num) :=
   if   h: IsGreaterThan num val
-  then some <| NumberGreaterThan.just ⟨val, h⟩
+  then NumberGreaterThan.just ⟨val, h⟩
   else none
 
 def greaterThanPatterned (num : Int) (val : Int) : Option (NumberGreaterThan num) :=
   match h : num < val |> decide with
-  | true  => some <| NumberGreaterThan.just ⟨val, (of_decide_eq_true h)⟩
+  | true  => NumberGreaterThan.just ⟨val, (of_decide_eq_true h)⟩
   | false => none
 
 -- Meant to understand how to pass props as arguments.
@@ -40,7 +40,7 @@ def matchesProp
     (ctor : {val' : β // prop comparand val'} → γ)
     [Decidable (prop comparand value)]
     : (Option γ) :=
-   if holds : prop comparand value then some (ctor ⟨value, holds⟩) else none
+   if holds : prop comparand value then ctor ⟨value, holds⟩ else none
 
 def greaterThanPassingProp (gt : Int) (val : Int) : Option (NumberGreaterThan gt) :=
   matchesProp gt val (· < ·) NumberGreaterThan.just
