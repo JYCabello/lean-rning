@@ -176,3 +176,31 @@ def checkCompany (input : RawInput) :  Validate ValidationErrors LegacyCheckedIn
   checkThat (input.birthYear == "FIRM") "birth year" "FIRM if a company"
   *> .company
   <$> checkName input.name
+
+def checkSubtype
+    {α : Type}
+    (v : α)
+    (p : α → Prop)
+    [Decidable (p v)]
+    (err : ε)
+    : Validate (NonEmptyList ε) {x : α // p x} :=
+  if h : p v then
+    pure ⟨v, h⟩
+  else
+    .errors { head := err, tail := [] }
+
+def checkHumanBefore1970
+    (input : RawInput)
+    : Validate ValidationErrors LegacyCheckedInput :=
+  (checkYearIsNat input.birthYear).andThen fun y =>
+    .humanBefore1970
+    <$> checkSubtype y (fun x => x > 999 ∧ x < 1970) ("birth year", "less than 1970")
+    <*> pure input.name
+
+def checkHumanAfter1970
+   (input : RawInput)
+   : Validate ValidationErrors LegacyCheckedInput :=
+  (checkYearIsNat input.birthYear).andThen fun y =>
+    .humanAfter1970
+    <$> checkSubtype y (· > 1970) ("birth year", "greater than 1970")
+    <*> checkName input.name
