@@ -32,7 +32,24 @@ def greaterThanPatterned (num : Int) (val : Int) : Option (NumberGreaterThan num
   | true  => some <| NumberGreaterThan.just val (of_decide_eq_true h)
   | false => none
 
+def matchesProp
+    (num : Int)
+    (val : Int)
+    (property : Int → Int → Prop)
+    (constructor : {x : Int // property num x} → β)
+    [Decidable (property num val)]
+    : (Option β) :=
+   if h : property num val then some (constructor ⟨val, h⟩) else none
+
+def greaterThanWithPropAbstraction (num : Int) (val : Int) : Option (NumberGreaterThan num) :=
+  matchesProp num val (λ n v => (n < v)) (fun x => NumberGreaterThan.just x.val x.property)
+
 def greaterThanTen := greaterThan 10
 
 #eval greaterThanTen 15
 #eval greaterThanTen 5
+
+def greatererThanTen := greaterThanWithPropAbstraction 10
+
+#eval greatererThanTen 15
+#eval greatererThanTen 5
