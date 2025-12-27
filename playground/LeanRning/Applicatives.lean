@@ -173,6 +173,6 @@ def checkThat
   if condition then pure () else reportError field msg
 
 def checkCompany (input : RawInput) :  Validate ValidationErrors LegacyCheckedInput :=
-  pure (fun () name => .company name) <*>
-  checkThat (input.birthYear == "FIRM") "birth year" "FIRM if a company" <*>
-  checkName input.name
+  checkThat (input.birthYear == "FIRM") "birth year" "FIRM if a company"
+  *> pure .company
+  <*> checkName input.name
