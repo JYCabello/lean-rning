@@ -36,6 +36,15 @@ instance : HAppend (NonEmptyList α) (List α) (NonEmptyList α) where
   hAppend xs ys :=
     { head := xs.head, tail := xs.tail ++ ys }
 
+
+inductive TreeError where
+  | field : Field → String → TreeError
+  | path : String → TreeError → TreeError
+  | both : TreeError → TreeError → TreeError
+
+instance : Append TreeError where
+  append := .both
+
 inductive Validate (ε α : Type) : Type where
   | ok : α → Validate ε α
   | errors : ε → Validate ε α
@@ -94,16 +103,7 @@ def checkInput (thisYear : Nat) (input : RawInput) : Validate ValidationErrors (
   checkYear input.birthYear thisYear
 
 def doubleId (a : α) (b : β) : (α × β) := (a, b)
-
 def tripleId (a : α) (b : β) (c : γ) : (α × β × γ) := (a, b, c)
-
-inductive TreeError where
-  | field : Field → String → TreeError
-  | path : String → TreeError → TreeError
-  | both : TreeError → TreeError → TreeError
-
-instance : Append TreeError where
-  append := .both
 
 #eval pure tripleId <*> checkName "potato" <*> checkYear "1999" 2020 <*> checkName "banana"
 
