@@ -83,16 +83,14 @@ inductive Validate (ε α : Type) : Type where
   | errors : ε → Validate ε α
   deriving Repr
 
-instance : Functor (Validate ε) where
-  map f
-   | .ok x => .ok (f x)
-   | .errors errs => .errors errs
-
 instance [Append ε] : Applicative (Validate ε) where
   pure := .ok
   seq f x :=
     match f with
-    | .ok g => g <$> (x ()) -- Same as `Functor.map g (x ())`
+    | .ok g =>
+      match x () with
+        | .ok x' => .ok (g x')
+        | .errors errs' => .errors errs'
     | .errors errs =>
       match x () with
       | .ok _ => .errors errs
