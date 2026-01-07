@@ -24,9 +24,7 @@ class HasEntityId (α : Type u) where
 class HasUniqueName (α : Type u) where
   uniqueName : String
 
-class CommandDefinition (α : Type u) extends (HasEntityId α), (HasUniqueName α) where
-  tryGetEntityId := HasEntityId.tryGetEntityId
-  uniqueName := HasUniqueName.uniqueName α
+class CommandDefinition (α : Type u) extends (HasEntityId α), (HasUniqueName α)
 
 def command (α : Type u)
     [HasEntityId α]
